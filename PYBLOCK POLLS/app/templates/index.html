@@ -1,0 +1,423 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <br>
+    <div style="width:100%">
+        <div style="float: left; width: 70%; height: 200px;">
+            <form action="/submit" id="textform" method="post">
+                <table style="width:70%; float: right;">
+                    <tr>
+                        <td>
+                            <label>Click here to generate OTP</label>
+                        </td>
+                        <td colspan="2">
+                            <button id="getOTP" type="button">Get OTP</button>
+                        </td>  
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Select Political party to vote</label>
+                        </td>
+                        <td>
+                            <select name="party" required style="font-weight: bold; padding: 4px; width: 300px;">
+                                <option value="">select</option>
+                                {% for political_partie in political_parties %}
+                                <option value="{{political_partie}}">{{political_partie}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Enter Voter ID</label>
+                        </td>
+                        <td>
+                            <input type="text" name="voter_id" id="voter_id" placeholder="VOID001" style="font-weight: bold; padding: 4px; width: 300px;" required>
+                        </td>
+                    </tr>
+					<tr>
+                        <td>
+                            <label>Enter Your Name</label>
+                        </td>
+                        <td>
+                            <input type="text" name="voter_name" id="voter_name" placeholder="Your Name" style="font-weight: bold; padding: 4px; width: 300px;" required>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <input type="submit" value="Vote" id="voteButton" disabled>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            
+        </div>
+    </div>
+    
+    <table></table>
+    <br>
+     
+    
+    <div style="float:center; width: 100% ; height: 200px">
+        <table style="width:100%; float: center;">
+            <div id="flashMessage" class="flash-message"></div>
+            <tr>
+                <br>
+                <td class="center-align">ADMIN ACCESS ONLY</td>
+                <br>
+            </tr>
+            <br>
+            <tr>
+                <td class="center-align">Admin Authentication  :  <button onclick="openPopup()">Authenticate Here</button></td>
+            </tr>
+            <tr>
+                 
+                <td class="center-align"><a href="{{node_address}}/mine" target="_blank"><button  id="requestToMine" disabled>Request to mine</button></a><a href="/"><button id="resync" disabled>Resync</button></a><a href="{{node_address}}/chain" target="_blank"><button id="viewChain" disabled>View Chain</button></a></td>
+                
+            </tr>
+            
+        </table>
+        <table></table>
+    </div>
+    <div id="popup" class="popup">
+        <h2>Enter Credentials</h2>
+        <form id="loginForm">
+          <label for="username">Username:</label><br>
+          <input type="text" id="username" name="username" placeholder="Enter Username here"><br>
+          <label for="password">Password:</label><br>
+          <input type="password" id="password" name="password" placeholder="Enter Password here"><br><br>
+          <button type="submit">Authenticate</button>
+        </form>
+    </div>
+
+    <div style="margin: 20px;">
+
+        <div class="col-md-6">
+            <h2>Result Detail</h2>
+
+            <table>
+                <tr>
+                    <th>Voter ID</th>
+                    <th>Political Party Name</th>
+                    <th>Voted Time</th>
+                </tr>
+                {% for post in posts %}
+                <tr>
+                    <td>{{post.voter_id}}</td>
+                    <td>{{post.party}}</td>
+                    <td>{{readable_time(post.timestamp)}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="col-md-4" style="margin-left: 10px;">
+            <h2>Result Summary</h2>
+
+            <table>
+                <tr>
+                    <th width="25%">Political Party Name</th>
+                    <th width="25%">Total vote gain</th>
+                </tr>
+                {% for p in political_parties %}
+                <tr>
+                    <td>{{p}}</td>
+                    <td>{{vote_gain.count(p)}}</td>
+                </tr>
+                {% endfor %}
+            </table><!-- Modal -->
+        </div>
+    </div>
+    <div>
+        <div id="otpModal" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+             <span class="close">&times;</span>
+             <h2>Generate OTP</h2>
+             <form action="/send_otp" method="post">
+                 <label for="email">Enter your email:</label>
+                 <input type="email" id="email" name="email" placeholder="email" required>
+                 <button type="submit">Generate and Send OTP</button>
+             </form>
+             </hr>
+             <h2>Enter OTP</h2>
+             <form action="/verify_otp" method="post">
+                <label for="email_verify">Enter your email:</label>
+                <input type="email" id="email_verify" name="email_verify" placeholder="email" required>
+                <label for="otp">Enter OTP:</label>
+                <input type="text" id="otp" name="otp" placeholder="OTP" required>
+                <button type="submit">Verify OTP</button>
+             </form>
+        </div>
+    </div>
+    <!-- Your JavaScript code here -->
+    <script>
+        // Get the modal
+        var modal = document.getElementById("otpModal");
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("getOTP");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        for(var i=0; i<span.length; i++) {
+            span[i].onclick = function() {
+                modal.style.display = "none";
+                authenticateModal.style.display = "none";
+            }
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+    </script>
+    
+    <script>
+        function handleSelection() {
+            var voterID = document.getElementById("voter_id").value;
+            var voterName = document.getElementById("voter_name");
+
+            // Map voter_id to corresponding voter_name
+            var names = {
+                "VOID001": "Lavanya V",
+                "VOID002": "John W",
+                "VOID003": "Emily S",
+                "VOID004": "Jeevan S",
+                "VOID005": "Shanmugesh D",
+                "VOID006": "Srihari M",
+                "VOID007": "Elavarasan N",
+                "VOID008": "Mothina P",
+                "VOID009": "Mythili M",
+                "VOID010": "Alli k",
+                "VOID011": "Usha S",
+                "VOID012": "Venkat M",
+                "VOID013": "Joseph Vijay",
+                "VOID014": "Kumar K",
+                "VOID015": "Sahana R"
+            // Add more mappings as needed
+            };
+
+            // Set the value of the name field based on the selected voter_id
+            if (names[voterID]) {
+                voterName.value = names[voterID];
+            } else {
+                voterName.value = ""; // Clear the name field if no match found
+            }
+        }
+
+        document.getElementById("voter_id").addEventListener("change", handleSelection);
+    </script>
+
+    <script>
+        // Function to enable the vote button
+        function enableVoteButton() {
+            var voteButton = document.getElementById("voteButton");
+            if (voteButton) {
+                voteButton.disabled = false; // Enable the vote button
+            }
+        }
+        
+        // Call the function to disable the vote button initially
+        enableVoteButton();
+
+        // Function to disable the vote button
+        function disableVoteButton() {
+            var voteButton = document.getElementById("voteButton");
+            if (voteButton) {
+                voteButton.disabled = true; // Disable the vote button
+            }
+        }
+        
+        // Call the function to disable the vote button initially
+        disableVoteButton();
+        
+        // Add event listener to trigger enable/disable based on OTP verification status
+        document.addEventListener("DOMContentLoaded", function() {
+            var successMessage = document.querySelector(".success");
+            var errorMessage = document.querySelector(".error");
+            if (successMessage) {
+                enableVoteButton();
+            } else if (errorMessage) {
+                disableVoteButton();
+            }
+        });
+    </script>
+    <script>
+        // Function to open the popup
+        function openPopup() {
+          document.getElementById('popup').style.display = 'block';
+        }
+      
+        // Function to close the popup
+        function closePopup() {
+          document.getElementById('popup').style.display = 'none';
+        }
+      
+        // Function to handle form submission
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+          event.preventDefault(); // Prevent form submission
+          var username = document.getElementById('username').value;
+          var password = document.getElementById('password').value;
+      
+          // Check if username and password are correct
+          if (username === "Vote@pyblockpolls" && password === "123456") {
+            // Enable the buttons if credentials are correct
+            enableButtons();
+            showFlashMessage("Verified successfully", true);
+            closePopup(); // Close the popup
+          } else {
+            showFlashMessage("Verification failed", false);
+          }
+        });
+      
+        // Function to enable buttons
+        function enableButtons() {
+          document.getElementById('requestToMine').disabled = false;
+          document.getElementById('resync').disabled = false;
+          document.getElementById('viewChain').disabled = false;
+        }
+        // Function to show flash message
+        function showFlashMessage(message, success) {
+        var flashMessageDiv = document.getElementById('flashMessage');
+        flashMessageDiv.textContent = message;
+        flashMessageDiv.style.color = success ? 'green' : 'red';
+        flashMessageDiv.style.display = 'block';
+        // Hide the message after 3 seconds
+        setTimeout(function() {
+            flashMessageDiv.style.display = 'none';
+        }, 3000);
+        }
+    </script>
+    
+     
+
+
+    <style>
+	table {
+	  font-family: arial, sans-serif;
+	  border-collapse: collapse;
+	  width: 100%;
+	}
+
+	td, th {
+	  border: 1px solid #c3caff;
+	  text-align: left;
+	  padding: 6px;
+      color: #000000;
+      font-weight: bold; /* Make text bold */
+      font-size: 18px; /* Increase font size to 16 pixels */
+	}
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      z-index: 1000;
+    }
+
+	.col-md-4{
+	    float: left;
+	    width: 33.33333333%;
+	}
+	.col-md-2{
+	    float: left;
+	    width: 16.33333333%;
+	}
+	.col-md-6{
+	    float: left;
+	    width: 60.33333333%;
+	}
+
+    /* Styles for the modal */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    
+    /* Close button */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+    }
+
+    .center-align {
+        text-align: center;
+    }
+    
+
+    /* Close button */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+</style>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</body>
+
+</div>
+{% endblock %}

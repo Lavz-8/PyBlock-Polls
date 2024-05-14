@@ -1,0 +1,74 @@
+<html>
+  <head>
+     <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+      button {
+            background-color: #d77538; /* Green */
+            border: none;
+            color: white;
+            padding: 5px 10px; 
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+       }
+
+        button:hover {
+            background-color: #45a049; /* Darker green */
+        }
+
+        button:active {
+            background-color: #3e8e41; /* Active state */
+        }
+
+      body {
+          background: linear-gradient(135deg, #f95b00, #fcfcffb2, #03ff07aa);
+          color: #fff;
+      }
+      h2{
+        color: #001f3f;
+      }
+      h1 {
+            color: #001f3f; /* Dark blue color */
+            animation: zoom 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes zoom {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.1);
+            }
+        }
+      
+    </style>
+  </head>
+  <body>
+   
+    <center><h1>{{ title }}</h1></center>
+    <hr>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <center>
+   
+    {% for category, message in messages %}
+        {% if category=='error'%}
+          <li style="color: red">{{ message }} </li>
+        {% else %}
+          <li style="color: blue">{{ message }} </li>
+        {% endif %}
+      
+    {% endfor %}
+    </center>
+   
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </body>
+</html>
