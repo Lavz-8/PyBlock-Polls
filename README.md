@@ -27,6 +27,8 @@ python app.py
 ### Access the Application:
 ```bash
 Open your web browser and navigate to http://localhost:8000.
+```
+```bash
 Open your web browser and navigate to http://localhost:5000.
 ```
 
