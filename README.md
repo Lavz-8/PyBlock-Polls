@@ -39,3 +39,6 @@ Open your web browser and navigate to http://localhost:5000.
 
 ### Contributing:
 Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## Credits
+This PyBlock Polls was created by **Lavanya Varadharajan**.
